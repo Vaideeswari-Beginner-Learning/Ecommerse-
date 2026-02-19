@@ -1,82 +1,71 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import Products from "./pages/Products";
+import Cart from "./pages/Cart";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import AdminDashboard from "./pages/dashboard/admin/AdminDashboard";
+import UserDashboard from "./pages/dashboard/UserDashboard";
+import ForgotPassword from "./pages/ForgotPassword";
+import Checkout from "./pages/Checkout";
+import GeneralServices from "./pages/services/GeneralServices";
+import BookAppointment from "./pages/services/BookAppointment";
+import { getAuth } from "./utils/auth";
 
-import Navbar from "./components/Navbar.jsx";
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const auth = getAuth();
+  // Simple check: is there auth data?
+  if (!auth) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
 
-// Public Pages
-import Home from "./pages/Home.jsx";
-import Products from "./pages/Products.jsx";
-import Cart from "./pages/Cart.jsx";
-import Login from "./pages/Login.jsx";
-import Register from "./pages/Register.jsx";
+import Footer from "./components/Footer";
 
-// Dashboards
-import UserDashboard from "./pages/dashboard/UserDashboard.jsx";
+import Banner from "./components/Banner";
 
-// Admin Pages
-import AdminDashboard from "./pages/dashboard/admin/AdminDashboard.jsx";
-import AdminProducts from "./pages/dashboard/admin/AdminProducts.jsx";
-import AdminProductForm from "./pages/dashboard/admin/AdminProductForm.jsx";
+const App = () => {
+  const location = useLocation();
+  const hideBannerRoutes = ["/login", "/register", "/forgot-password"];
+  const showBanner = !hideBannerRoutes.includes(location.pathname);
 
-// Route Guards
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import AdminRoute from "./components/AdminRoute.jsx";
-
-export default function App() {
   return (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Navbar />
+      {showBanner && <Banner />}
 
-      <Routes>
-        {/* Public */}
-        <Route path="/" element={<Home />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/cart" element={<Cart />} />
+      <div style={{ flex: 1 }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        {/* User Dashboard */}
-        <Route
-          path="/dashboard/user"
-          element={
+          {/* Potected Routes: Login Required */}
+          <Route path="/products" element={<Products />} />
+          <Route path="/cart" element={
             <ProtectedRoute>
-              <UserDashboard />
+              <Cart />
             </ProtectedRoute>
-          }
-        />
+          } />
 
-        {/* Admin Dashboard */}
-        <Route
-          path="/dashboard/admin"
-          element={
-            <AdminRoute>
-              <AdminDashboard />
-            </AdminRoute>
-          }
-        />.
+          <Route path="/checkout" element={<Checkout />} />
 
-        {/* Admin Products */}
-        <Route
-          path="/dashboard/admin/products"
-          element={
-            <AdminRoute>
-              <AdminProducts />
-            </AdminRoute>
-          }
-        />
+          {/* Service Routes */}
+          <Route path="/services/general" element={<GeneralServices />} />
+          <Route path="/services/appointment" element={<BookAppointment />} />
 
-        {/* Add/Edit Product */}
-        <Route
-          path="/dashboard/admin/products/:id"
-          element={
-            <AdminRoute>
-              <AdminProductForm />
-            </AdminRoute>
-          }
-        />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard/admin" element={<AdminDashboard />} />
+          <Route path="/dashboard/user" element={<UserDashboard />} />
+        </Routes>
+      </div>
 
-        <Route path="*" element={<h2 style={{ padding: 20 }}>404 Page Not Found</h2>} />
-      </Routes>
-    </>
+      <Footer />
+    </div>
   );
-}
+};
+
+export default App;

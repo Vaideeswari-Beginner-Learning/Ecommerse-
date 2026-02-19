@@ -23,6 +23,7 @@ const orderSchema = new mongoose.Schema(
       pincode: String
     },
     paymentMethod: { type: String, default: "COD" },
+    serviceType: { type: String, default: "Material & Manpower", enum: ["Material & Manpower", "Manpower Only"] },
     subtotal: { type: Number, required: true },
     shipping: { type: Number, default: 0 },
     total: { type: Number, required: true },

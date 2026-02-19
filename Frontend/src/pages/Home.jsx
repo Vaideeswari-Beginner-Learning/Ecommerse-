@@ -11,86 +11,75 @@ const DESIGN_MAP = {
 
 export default function Home() {
   const navigate = useNavigate();
-  const [openCategory, setOpenCategory] = useState(null);
-  const [selectedDesign, setSelectedDesign] = useState("All");
 
+  // Colorful Categories
   const categories = [
-    { name: "Sofa", desc: "Comfort for living rooms" },
-    { name: "Chair", desc: "Office & ergonomic chairs" },
-    { name: "Table", desc: "Study, dining & coffee tables" },
-    { name: "Interior", desc: "Lamps, shelves & décor" }
+    { name: "Sofa", desc: "Premium Comfort", color: "linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%)", icon: "🛋️" },
+    { name: "Chair", desc: "Ergonomic & Stylish", color: "linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)", icon: "🪑" },
+    { name: "Table", desc: "Dining & Coffee", color: "linear-gradient(120deg, #f093fb 0%, #f5576c 100%)", icon: <img src="https://img.icons8.com/color/96/coffee-table.png" alt="Table" style={{ width: '80px', height: '80px' }} /> },
+    { name: "Interior", desc: "Decor & Lighting", color: "linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%)", icon: "🖼️" }
   ];
 
-  const onCategoryClick = (cat) => {
-    // Toggle dropdown
-    if (openCategory === cat) {
-      setOpenCategory(null);
-      return;
-    }
-    setOpenCategory(cat);
-    setSelectedDesign("All");
-  };
-
-  const onGo = () => {
-    if (!openCategory) return;
-
-    // Navigate with filters
-    const cat = encodeURIComponent(openCategory);
-    const des = encodeURIComponent(selectedDesign);
-
-    if (selectedDesign === "All") navigate(`/products?category=${cat}`);
-    else navigate(`/products?category=${cat}&design=${des}`);
+  const handleCategoryClick = (catName) => {
+    navigate(`/products?category=${encodeURIComponent(catName)}`);
   };
 
   return (
-    <div>
-      <h2>Shop by Category</h2>
+    <div style={{ padding: "40px 20px" }}>
+      <h2 style={{ textAlign: "center", marginBottom: "40px", fontSize: "2.5rem", color: "#333" }}>
+        Browse Categories
+      </h2>
 
-      <div className="grid-4">
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+        gap: "30px",
+        maxWidth: "1200px",
+        margin: "0 auto"
+      }}>
         {categories.map((c) => (
           <div
             key={c.name}
-            className="card"
+            onClick={() => handleCategoryClick(c.name)}
             style={{
+              background: c.color,
+              borderRadius: "20px",
+              padding: "30px",
+              color: "white",
+              textAlign: "center",
               cursor: "pointer",
-              border: openCategory === c.name ? "2px solid #111" : "1px solid #eee"
+              boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
+              transition: "transform 0.3s ease, box-shadow 0.3s ease",
+              position: "relative",
+              overflow: "hidden"
             }}
-            onClick={() => onCategoryClick(c.name)}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-10px) scale(1.05)";
+              e.currentTarget.style.boxShadow = "0 20px 30px rgba(0,0,0,0.2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0) scale(1)";
+              e.currentTarget.style.boxShadow = "0 10px 20px rgba(0,0,0,0.1)";
+            }}
           >
-            <div style={{ fontWeight: 900, fontSize: 18 }}>{c.name}</div>
-            <div className="small" style={{ marginTop: 6 }}>{c.desc}</div>
-            <div style={{ marginTop: 10 }} className="small">Click to choose design ↓</div>
+            <div style={{ fontSize: "4rem", marginBottom: "15px" }}>{c.icon}</div>
+            <h3 style={{ fontSize: "1.8rem", margin: "0 0 10px 0", fontWeight: "bold", textShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>
+              {c.name}
+            </h3>
+            <p style={{ fontSize: "1.1rem", opacity: 0.9 }}>{c.desc}</p>
+            <div style={{
+              marginTop: "20px",
+              background: "rgba(255,255,255,0.2)",
+              padding: "8px 15px",
+              borderRadius: "20px",
+              display: "inline-block",
+              fontWeight: "bold"
+            }}>
+              Explore ➔
+            </div>
           </div>
         ))}
       </div>
-
-      {/* ✅ Dropdown shows ONLY when a category is clicked */}
-      {openCategory && (
-        <div className="card" style={{ marginTop: 14, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-          <div style={{ fontWeight: 900 }}>
-            {openCategory} Designs:
-          </div>
-
-          <select
-            className="input"
-            style={{ maxWidth: 260 }}
-            value={selectedDesign}
-            onChange={(e) => setSelectedDesign(e.target.value)}
-          >
-            {DESIGN_MAP[openCategory].map((d) => (
-              <option key={d} value={d}>{d}</option>
-            ))}
-          </select>
-
-          <button className="btn btn-dark" onClick={onGo}>
-            Show Products
-          </button>
-
-          <button className="btn btn-light" onClick={() => setOpenCategory(null)}>
-            Close
-          </button>
-        </div>
-      )}
     </div>
   );
 }

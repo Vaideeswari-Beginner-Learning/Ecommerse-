@@ -10,7 +10,12 @@ app.use(express.json({ limit: "2mb" }));
 
 app.get("/", (req, res) => res.send("API running"));
 
+import orderRoutes from "./routes/order.routes.js";
+
+// ... existing code ...
+
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/orders", orderRoutes);
 
 export default app;

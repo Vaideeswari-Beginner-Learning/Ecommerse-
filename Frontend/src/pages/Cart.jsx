@@ -1,90 +1,91 @@
-import { useEffect, useMemo, useState } from "react";
-import { cartTotal, getCart, removeFromCart, updateQty } from "../utils/cart.js";
+import { useContext } from "react";
+import { CartContext } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
+import "./Cart.css";
 
-export default function Cart() {
-  const [cart, setCart] = useState([]);
-
-  useEffect(() => {
-    setCart(getCart());
-    const onUpdate = () => setCart(getCart());
-    window.addEventListener("cart:updated", onUpdate);
-    return () => window.removeEventListener("cart:updated", onUpdate);
-  }, []);
-
-  const total = useMemo(() => cartTotal(), [cart]);
-
-  const placeOrder = () => {
-    // For now: just demo behavior
-    alert(`Order placed! Total: ₹${total}`);
-    localStorage.removeItem("cart");
-    window.dispatchEvent(new Event("cart:updated"));
-    setCart([]);
-  };
+const Cart = () => {
+  const { cart, increaseQty, decreaseQty, removeFromCart } =
+    useContext(CartContext);
+  const navigate = useNavigate();
 
   if (cart.length === 0) {
     return (
-      <div className="container">
-        <h2>Cart</h2>
-        <p>Your cart is empty.</p>
+      <div style={{ textAlign: "center", padding: "50px 20px" }}>
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/11329/11329126.png"
+          alt="Empty Cart"
+          style={{ width: '250px', marginBottom: '20px', animation: 'float 3s ease-in-out infinite' }}
+        />
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '10px' }}>Your Cart is Empty</h2>
+        <p style={{ color: '#777', marginBottom: '30px' }}>It looks like you haven't added anything to your cart yet.</p>
+        <style>{`
+            @keyframes float {
+                0% { transform: translateY(0px); }
+                50% { transform: translateY(-15px); }
+                100% { transform: translateY(0px); }
+            }
+        `}</style>
+        <button
+          onClick={() => navigate('/products')}
+          style={{
+            padding: '12px 30px', background: '#9c27b0', color: 'white',
+            border: 'none', borderRadius: '5px', fontSize: '1rem', cursor: 'pointer', fontWeight: 'bold'
+          }}
+        >
+          View Products
+        </button>
       </div>
     );
   }
 
+  const totalPrice = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
+
   return (
-    <div className="container">
-      <h2>Cart</h2>
+    <div className="cart-page" style={{ background: "linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%)", minHeight: '100vh', padding: '40px 20px', borderRadius: '0', marginTop: '0', boxSizing: 'border-box' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: '20px', color: '#444' }}>Your Shopping Cart</h2>
 
-      <div className="cart-grid">
+      <div className="cart-container">
         {cart.map((item) => (
-          <div key={item.id} className="cart-card">
-            <img src={item.image} alt={item.title} />
+          <div className="cart-card" key={item.id}>
+            <div className="card-image">
+              <img src={item.image} alt={item.name} />
+            </div>
 
-            <div className="cart-info">
-              <p className="cart-title">{item.title}</p>
-              <p className="cart-price">₹{item.price}</p>
+            <div className="card-details">
+              <h3>{item.name}</h3>
+              <p className="item-price">₹ {item.price}</p>
+            </div>
 
-              {/* ✅ qty controls */}
-              <div className="qty-row">
-                <button
-                  className="qty-btn"
-                  onClick={() => updateQty(item.id, (item.qty || 1) - 1)}
-                >
-                  -
-                </button>
-                <div className="qty-value">{item.qty || 1}</div>
-                <button
-                  className="qty-btn"
-                  onClick={() => updateQty(item.id, (item.qty || 1) + 1)}
-                >
-                  +
-                </button>
-
-                <div className="line-total">
-                  ₹{item.price * (item.qty || 1)}
-                </div>
-
-                <button
-                  className="cart-remove"
-                  onClick={() => removeFromCart(item.id)}
-                >
-                  Remove
-                </button>
+            <div className="card-actions">
+              <div className="qty-control">
+                <button onClick={() => decreaseQty(item.id)}>-</button>
+                <span>{item.qty}</span>
+                <button onClick={() => increaseQty(item.id)}>+</button>
               </div>
+              <p className="subtotal">Sub: ₹ {item.price * item.qty}</p>
+              <button
+                className="remove-btn"
+                onClick={() => removeFromCart(item.id)}
+              >
+                Remove
+              </button>
+              <button
+                className="buy-now-btn"
+                onClick={() => navigate("/checkout", { state: { singleItem: item } })}
+              >
+                Buy Now
+              </button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* ✅ footer total + order */}
       <div className="cart-summary">
-        <div className="cart-total">
-          <span>Total</span>
-          <span>₹{total}</span>
-        </div>
-        <button className="order-btn" onClick={placeOrder}>
-          Place Order
-        </button>
+        <h3>Total Cart Value: ₹ {totalPrice}</h3>
+        {/* Proceed to Checkout Button Removed as requested */}
       </div>
     </div>
   );
-}
+};
+
+export default Cart;
